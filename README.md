@@ -4,3 +4,5 @@
 - modeling.R : The code to fit the full data to our model, including the selection of the best hyper-parameter.
 - app.R: The code to run R shiny website.
 - Check our results at https://asa-competition-smu.shinyapps.io/asa-groupc.
+
+The descriptions of problem: https://community.amstat.org/dataexpo/home.
