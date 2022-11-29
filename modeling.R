@@ -49,7 +49,7 @@ consult_lasso = function(w=1,with_interation = FALSE,nfold=10,lambda=exp(seq(-2,
   title(title,line = 3)
   
   #top 10 counties overperformed and underperformed
-  score.county.pre = predict(cv.lasso.death,x,s="lambda.min")
+  score.county.pre = predict(cv.lasso,x,s="lambda.min")
   residual.county.score = y - score.county.pre 
   idx.best= numeric(10)
   idx.worst= numeric(10)
