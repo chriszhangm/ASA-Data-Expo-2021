@@ -1,7 +1,15 @@
 library(stringr)
 library(tidyr)
+#Assume 
+setwd("..")
+getwd()
+setwd('~/Downloads/ASA-Data-Expo-2021-main/Census_raw_data/')
+#------------------------------------------------------------------------#
+#Please uncomment the following if the file was downloaded in Desktop
+#setwd('~/Desktop//ASA-Data-Expo-2021-main/Census_raw_data/')
+#------------------------------------------------------------------------#
+options(warn=-1)
 states.asa = c('AL','AR','FL','GA','KY','LA','MS','NC','OK','SC','TN','TX','VA')
-
 ###############
 ###Education###
 ###############
@@ -82,7 +90,7 @@ for (j in filepath_internet) {
 ###############
 ###Population##
 ###############
-filepath_pop = paste0('Population /ACSST1Y2019.S0101-',states.asa,'.csv')
+filepath_pop = paste0('Population/ACSST1Y2019.S0101-',states.asa,'.csv')
 asa.population = NULL
 asa.under5yr = NULL
 asa.15yrto44yr = NULL
@@ -197,7 +205,7 @@ death.asa$County.Name[2914] = "James County "
 death.asa$County.Name[2940] = "Prince County "
 death.asa$County.Name[2985] = "City of Newport"
 
-#-----------------------------------------------------------#
+#-------------------------------------------------------------------------------------#
 idx.asa = NULL
 for (i in 1:dim(infect.asa)[1]) {
   if (sum(infect.asa$State[i]==states.asa)==1) {
@@ -230,8 +238,8 @@ temp.merge.infect = merge(temp.asa.infect,asa.total,by=c('asa.county','asa.state
 temp.merge.death = merge(temp.asa.death,asa.total,by=c('asa.county','asa.states'))
 
 #Keep Only Time-related data
-temp.merge.infect = temp.merge.infect[,1:433]
-temp.merge.death = temp.merge.death[,1:433]
+temp.merge.infect = temp.merge.infect[,1:434]
+temp.merge.death = temp.merge.death[,1:434]
 
 #write.csv(temp.merge.infect,'USASE_infect.csv')
 #write.csv(temp.merge.death,'USASE_death.csv')
@@ -240,18 +248,18 @@ states.asa = c('AL','AR','FL','GA','KY','LA','MS','NC','OK','SC','TN','TX','VA')
 
 df.infect = temp.merge.infect
 df.death = temp.merge.death
-df.infect[,5:435] = df.infect[,5:435]/df.infect[,4]
-df.death[,5:435] = df.death[,5:435]/df.infect[,4]
+df.infect[,5:433] = df.infect[,5:433]/as.numeric(df.infect[,434])
+df.death[,5:433] = df.death[,5:433]/as.numeric(df.death[,434])
 
 weekly_states_level_inf = NULL
 weekly_states_level_death = NULL
 
 for(i in 1:13){
-  weekly_states_level_inf=rbind(weekly_states_level_inf,as.numeric(apply(df.infect[which(df.infect$asa.states==states.asa[i]),seq(5,435,by=7)], 2, mean)))
-  weekly_states_level_death=rbind(weekly_states_level_death,as.numeric(apply(df.death[which(df.death$asa.states==states.asa[i]),seq(5,435,by=7)], 2, mean)))
+  weekly_states_level_inf=rbind(weekly_states_level_inf,as.numeric(apply(df.infect[which(df.infect$asa.states==states.asa[i]),seq(3,433,by=7)], 2, mean)))
+  weekly_states_level_death=rbind(weekly_states_level_death,as.numeric(apply(df.death[which(df.death$asa.states==states.asa[i]),seq(3,433,by=7)], 2, mean)))
 }
-weekly_totalstates_level_inf = as.numeric(apply(df.infect[,seq(5,435,by=7)], 2, mean))
-weekly_totalstates_level_death = as.numeric(apply(df.death[,seq(5,435,by=7)], 2, mean))
+weekly_totalstates_level_inf = as.numeric(apply(df.infect[,seq(3,433,by=7)], 2, mean))
+weekly_totalstates_level_death = as.numeric(apply(df.death[,seq(3,433,by=7)], 2, mean))
 
 weekly_states_level_inf = as.data.frame(weekly_states_level_inf)
 weekly_states_level_death = as.data.frame(weekly_states_level_death)
@@ -260,8 +268,8 @@ weekly_states_level_death[,63] = states.asa
 
 
 
-df.weekly.infect = df.infect[,c(2,3,seq(5,435,by=7))]
-df.weekly.death = df.death[,c(2,3,seq(5,435,by=7))]
+df.weekly.infect = df.infect[,c(2,3,seq(3,433,by=7))]
+df.weekly.death = df.death[,c(2,3,seq(3,433,by=7))]
 
 #add national-wise infection rate
 df.weekly.infect[,3:64] = 2*as.matrix(df.weekly.infect[,3:64]) - weekly_totalstates_level_inf
@@ -269,7 +277,7 @@ df.weekly.death[,3:64] = 2*as.matrix(df.weekly.death[,3:64]) - weekly_totalstate
 
 #add statewise
 for (i in 1:328) {
-  df.idx = which(df.weekly.infect$asa.states[i] == weekly_states_level$V63)
+  df.idx = which(df.weekly.infect$asa.states[i] == weekly_states_level_inf$V63)
   df.weekly.infect[i,3:64] = df.weekly.infect[i,3:64] - weekly_states_level_inf[df.idx,1:62]
   df.weekly.death[i,3:64] = df.weekly.death[i,3:64] - weekly_states_level_death[df.idx,1:62]
 }
@@ -278,8 +286,18 @@ for (i in 1:328) {
 score_inf = apply(df.weekly.infect[,3:64],1,sum)
 score_death = apply(df.weekly.death[,3:64],1,sum)
 score_df = data.frame(states = df.death$asa.states,county = df.death$asa.county,score_inf = score_inf,score_death=score_death)
-
-
-
+#
+for (i in c(4:8,10:14,16,18,19)) {
+  asa.total[,i] = as.numeric(asa.total[,i])/as.numeric(asa.total[,3])
+}
+df_full = data.frame(asa.county = df.death$asa.county, asa.states = df.death$asa.states, score_inf, score_death, asa.total[,4:19])
+for (i in 1:328) {
+  index_correct = which(df.death$asa.county[i] == asa.total$asa.county&df.death$asa.states[i] == asa.total$asa.states)
+  df_full[i,5:20] = asa.total[index_correct,4:19]
+}
+head(df_full)
+#write.csv(df_full,'full_data.csv')
+##CleanUp##
+options(warn=0)
 
 
