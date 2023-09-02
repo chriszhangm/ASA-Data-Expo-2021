@@ -158,16 +158,24 @@ mapw <- function(w, data=counties_prj, data_states=states_SE){
 }
 
 #Figure 1
+pdf('Death_Score.pdf')
 mapw(0)
+dev.off()
 #Figure 2
+pdf('Infection_Score.pdf')
 mapw(1)
+dev.off()
 #Figure 3
+pdf('Total_Score.pdf')
 mapw(0.5)
+dev.off()
 #Figure 4
+pdf('Correlation_plot.pdf',height = 8.23,width = 8.92)
 ggcorrplot(corr,type = "lower",
            outline.col = "white",
            ggtheme = ggplot2::theme_gray,
            colors = c("#6D9EC1", "white", "#E46726"),lab=TRUE)
+dev.off()
 #Figure 5
 ####Load Data
 TD2 <- read.csv("Fill_in_cities.csv")
@@ -198,6 +206,9 @@ dev.off()
 #Figure 6 
 #ScreenShot
 #Figure 7
+pdf("LOOCV-Result.pdf")
 par(mfrow=c(2,1))
 p=consult_lasso(w=1,title = 'Infection Score (Weight = 1)')
 p=consult_lasso(w=0,title = 'Death Score (Weight = 0)')
+dev.off()
+
