@@ -157,22 +157,47 @@ mapw <- function(w, data=counties_prj, data_states=states_SE){
     geom_path(data = data_states, color="black", mapping = aes(long,lat))+xlab('Longitude')+ylab('Latitude')
 }
 
-#mapw(0.5)
-#par(mfrow=c(2,1))
-#p=consult_lasso(w=1,title = 'Infection Score (Weight = 1)')
-#p=consult_lasso(w=0,title = 'Death Score (Weight = 0)')
+#Figure 1
+mapw(0)
+#Figure 2
+mapw(1)
+#Figure 3
+mapw(0.5)
+#Figure 4
+ggcorrplot(corr,type = "lower",
+           outline.col = "white",
+           ggtheme = ggplot2::theme_gray,
+           colors = c("#6D9EC1", "white", "#E46726"),lab=TRUE)
+#Figure 5
+####Load Data
+TD2 <- read.csv("Fill_in_cities.csv")
+TD2 <- TD2[,-1]
 
+TD2$IS_scaled <- scale(TD2$score_infection)
+TD2$DS_scaled <- scale(TD2$score_death)
 
-#map_lasso(ovpstate = p$result_df$best_state,
-          # ovpcounty = p$result_df$best_counties,
-          # udpstate = p$result_df$worst_state,
-          # udpcounty = p$result_df$worst_counties)
-
-#p$result_df
-
-
-
-# ggcorrplot::ggcorrplot(corr,type = 'lower',lab = TRUE,
-#                        outline.color = "white",
-#                        ggtheme = ggplot2::theme_gray,
-#                        colors = c("#6D9EC1", "white", "#E46726"))
+####scatterplots
+colnames(TD2)
+TD2$TS <- .5*(TD2$IS_scaled + TD2$DS_scaled)
+TD2_FL <- TD2[TD2$asa.states=="FL",]
+pdf("Scatterplots.pdf")
+par(mfrow=c(2,2))
+plot(TD2$asa.65andOver,TD2$IS_scaled, xlab="", ylab = "")
+abline(a=0.6373,b=-3.77,col="red",lty=2)
+text(0.5,3,expression(paste(rho==-0.205)),cex=1.3)
+title(ylab=expression(paste("Infection Score ",(w==1))), xlab="65 and Over", line=2.2, cex.lab=1.3)
+plot(TD2$asa.65andOver,TD2$DS_scaled, xlab="", ylab = "")
+abline(a=-0.531,b=3.141,col="red",lty=2)
+text(0.5,4,expression(paste(rho==0.170)),cex=1.3)
+title(ylab=expression(paste("Death Score ",(w==0))),xlab="65 and Over", line=2.2, cex.lab=1.3)
+plot(TD2$asa.65andOver,TD2$TS, xlab="", ylab = "")
+abline(a=0.053,b=-0.314,col="red",lty=2)
+text(0.5,2,expression(paste(rho==-0.020)),cex=1.3)
+title(ylab=expression(paste("Total Score ",(w==0.5))),xlab="65 and Over", line=2.2, cex.lab=1.3)
+dev.off()
+#Figure 6 
+#ScreenShot
+#Figure 7
+par(mfrow=c(2,1))
+p=consult_lasso(w=1,title = 'Infection Score (Weight = 1)')
+p=consult_lasso(w=0,title = 'Death Score (Weight = 0)')
